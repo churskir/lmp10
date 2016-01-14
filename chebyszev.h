@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "points.h"
 #include "matrix.h"
 

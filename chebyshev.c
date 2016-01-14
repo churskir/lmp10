@@ -49,8 +49,34 @@ matrix_t *fill_matrix_b() {
 	return b;
 }
 
+double ch_polynominal(int n, double x) {
+	assert(n >= 0);
+	if (n == 0)
+		return 1;
+	if (n == 1)
+		return x;
+
+	return 2 * x * ch_polynominal(n - 1, x) - ch_polynominal(n - 2, x);
+}
+
+double ch_approx(matrix_t *a; double x) {
+	double result = 0;
+	int num_of_par = a->rn;
+	int i;
+	
+	for (i = 0; i < num_of_par; i++)
+		result += a->data[i] * ch_polynominal(i, x);
+
+	return result;
+}
+
+void generate_output_set(matrix_t *a, points_t *pts_in, points_t *pts_out) {
+	fprintf()
+}
+
 void chebyshev(int n, points_t *pts_in, points_t *pts_out) {
 	matrix_t *A = fill_matrix_A(pts_in);
 	matrix_t *b = fill_matrix_b(pts_in);
 	matrix_t *a = ELIMINACJA_GAUSA_GDZIEKOLWIEK_ONA_JEST(A, b);
+	
 }
