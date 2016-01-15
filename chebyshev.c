@@ -1,8 +1,7 @@
 #include "chebyshev.h"
 
 /* returns n-th power of a; n in natural */
-int nth_power(int a, int n)
-{
+int nth_power(int a, int n) {
 	int i;
 	assert(n >= 0);
 	int result = 1;
@@ -19,8 +18,7 @@ int sum_ch(points_t *pts, int mode, int power) {
 	int pts_amount = pts->n + 1;
 	int i;
 	
-	for (i = 0; i < pts_amount; i++)
-	{
+	for (i = 0; i < pts_amount; i++) {
 		if (mode)
 			result += nth_power(pts->x[i], power) * pts->y[i];
 		else
@@ -29,24 +27,16 @@ int sum_ch(points_t *pts, int mode, int power) {
 	return result;
 }
 
-matrix_t *fill_matrix_A(points_t *pts) {
+matrix_t *fill_matrix(points_t *pts) {
 	int i, j;
 	int pts_amount = pts->n + 1;
-	matrix_t A = make_matrix(pts_amount, pts_amount);
+	matrix_t mat = make_matrix(pts_amount, pts_amount + 1);
 	for (i = 0; i < pts_amount; i++)
 	  for (j = 0; j < pts_amount; i++)
-		  A->data[i * pts_amount + j] = sum_ch(pts, 1, 2 * pts_amount -
-																  i - j)
-	return A;
-}
-
-matrix_t *fill_matrix_b() {
-	int i;
-	int pts_amount = pts->n + 1;
-	matrix_t b = make_matrix(pts_amount, 1);
-	for (i = 0; i < pts_amount; i++)
-	  A->data[i] = sum_ch(pts, 0, pts_amount - i - 1);
-	return b;
+		  mat->data[i * (pts_amount + 1) + j] = sum_ch(pts, 1, 2 * pts_amount -
+																          i - j)
+	  mat->data[i * (pts_amount + 1) + j] = sum_ch(pts, 0, pts_amount - i - 1);
+	return mat;
 }
 
 double ch_polynominal(int n, double x) {
@@ -55,7 +45,6 @@ double ch_polynominal(int n, double x) {
 		return 1;
 	if (n == 1)
 		return x;
-
 	return 2 * x * ch_polynominal(n - 1, x) - ch_polynominal(n - 2, x);
 }
 
@@ -70,13 +59,24 @@ double ch_approx(matrix_t *a; double x) {
 	return result;
 }
 
-void generate_output_set(matrix_t *a, points_t *pts_in, points_t *pts_out) {
-	fprintf()
+points_t *generate_output_set(int n, double from, double to, points_t *pts_in, matrix_t *mat) {
+	int index = 0;
+	double i;
+	double d = (to - from) / (n - 1);
+	points_t *pts_out;
+	pts_out->n = n;
+	pts_out->x = malloc(n * sizeof(double));
+	pts_out->y = malloc(n * sizeof(double));
+	
+	for (i = from; i <= to; i += d) {
+		pts_out->x[index] = i;
+		pts_out->y[index] = ch_approx(a, i);
+	}
 }
 
 void chebyshev(int n, points_t *pts_in, points_t *pts_out) {
-	matrix_t *A = fill_matrix_A(pts_in);
-	matrix_t *b = fill_matrix_b(pts_in);
-	matrix_t *a = ELIMINACJA_GAUSA_GDZIEKOLWIEK_ONA_JEST(A, b);
-	
+	matrix_t *mat = fill_matrix(pts_in);
+	if (piv_ge_solver(mat))
+		return EXIT_FAILURE;
+	pts_out = generate_output_set(n, from, to, pts_in, mat);
 }
