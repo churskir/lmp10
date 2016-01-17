@@ -1,4 +1,9 @@
-#include "ch_approx.h"
+#include "makespl.h"
+#include "piv_ge_solver.h"
+#include "ch_polynominals.h"
+
+#include <float.h>
+
 
 /* Zwraca n-tą potęgę a; zakłada, że n jest naturalne */
 int nth_power(int a, int n) {
@@ -70,33 +75,35 @@ double ch_approx(matrix_t *a; double x, int derivative) {
 	return result;
 }
 
-/* Tworzy zmienną typu spline_t i wypełnia ją. */
-spline_t *make_spl_ch(double x, matrix_t *mat) {
-	spline_t *fun = malloc(sizeof(spline_t));
-	
-	fun->n = malloc(sizeof(int));
-	fun->x = malloc(sizeof(double));
-	fun->f = malloc(sizeof(double));
-	fun->f1 = malloc(sizeof(double));
-	fun->f2 = malloc(sizeof(double));
-	fun->f3 = malloc(sizeof(double));
-	
-	fun->n = ?;
-	fun->x = x;
-	fun->f = ch_approx(mat, x, 0);
-	fun->f1 = ch_approx(mat, x, 1);
-	fun->f2 = ch_approx(mat, x, 2);
-	fun->f3 = ch_approx(mat, x, 3);
-	
-	return fun;
+/* Wypełnia spl*/
+void *fill_spl_ch(spline_t *spl, points_t *pts, matrix_t *mat) {
+	int n = pts->n - 3 > 10 ? 10 : pts->n - 3;
+	int i;
+	double x = pts->x[0], d = (pts->x[n - 1] - pts->x[0]) / (spl->n - 1);
+	char *nbEnv= getenv( "APPROX_BASE_SIZE" );
+
+	if( nbEnv != NULL && atoi( nbEnv ) > 0 )
+		n = atoi( nbEnv );
+		
+	if (!alloc_spl(spl, nb)) {
+		fun->n = n;
+		for (i = 0; i < n; i++) {
+			fun->x[i] = x;
+			fun->f[i] = ch_approx(mat, x, 0);
+			fun->f1[i] = ch_approx(mat, x, 1);
+			fun->f2[i] = ch_approx(mat, x, 2);
+			fun->f3[i] = ch_approx(mat, x, 3);
+			x += d + 10.0 * DBL_EPSILON;
+		}
+	}
 }
 
-spline_t *ch_approx(int n, points_t *pts_in) {
-	matrix_t *mat = fill_matrix(pts_in);
+void make_spl(points_t *pts, spline_t *spl) {
+	matrix_t *mat = fill_matrix(pts);
 	spline_t *fun;
 	double x;
 	if (piv_ge_solver(mat))
 		return EXIT_FAILURE;
 		
-	return make_spl_ch(pts_in->x[0], mat);	
+	return fill_spl_ch(spl, pts, mat);	
 }
